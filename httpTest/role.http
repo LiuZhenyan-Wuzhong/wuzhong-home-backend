@@ -1,0 +1,17 @@
+@json=Content-Type: application/json
+@baseUrl=http://localhost:5000
+
+### get target role
+GET {{baseUrl}}/api/role/:id
+
+### get target role
+PUT {{baseUrl}}/api/role/:id
+
+### get target role
+DELETE {{baseUrl}}/api/role/:id
+
+### post new role
+POST {{baseUrl}}/api/role
+
+### get all user roles
+GET {{baseUrl}}/api/role

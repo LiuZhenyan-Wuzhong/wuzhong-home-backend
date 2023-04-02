@@ -2,19 +2,21 @@
  * @Author:
  * @Date: 2023-02-21 22:42:49
  * @LastEditors: Please set LastEditors
- * @LastEditTime: 2023-02-22 00:28:12
+ * @LastEditTime: 2023-02-23 23:15:54
  * @Description:
  */
 const Article = require('../models/Article');
-const User = require('../models/User');
-const fs = require('fs');
+const Comment = require('../models/Comment');
+const Category = require('../models/Category');
+const Tag = require('../models/Tag');
 const cloudinary = require('cloudinary');
 
 const articleCtrller = {
     addArticle: (req, res, next) => {
+        console.log(req.body);
         const { text, title, claps, description } = req.body;
 
-        if (req.files.image) {
+        if (req.files && req.files.image) {
             cloudinary.uploader.upload(
                 req.files.image.path,
                 (result) => {
@@ -56,16 +58,48 @@ const articleCtrller = {
     },
 
     getAll: (req, res, next) => {
-        Article.find(req.params.id)
+        console.log(`get all articles`);
+
+        Article.find({})
+            .select('title description feature_img claps author category tags')
             .populate('author')
-            .populate('comments.author')
             .exec((err, article) => {
                 if (err) {
-                    res.send(err);
-                } else if (!article) {
-                    res.send(404);
+                    res.status(400).json({ msg: err });
                 } else {
-                    res.send(article);
+                    res.json(article);
+                }
+                next();
+            });
+    },
+
+    getAllArticleIds: (req, res, next) => {
+        console.log(`get all article ids`);
+
+        Article.find({})
+            .select('_id')
+            .exec((err, articleIds) => {
+                if (err) {
+                    res.status(400).json({ msg: err });
+                } else {
+                    res.json(articleIds.map((id) => id.toObject()._id));
+                }
+            });
+    },
+
+    getConditionalArticles: (req, res, next) => {
+        const { conditions, projection, options } = req.body;
+
+        const articles = Article.find(conditions, projection, options);
+
+        articles
+            .populate('author')
+            .populate('comments')
+            .exec((err, articles) => {
+                if (err) {
+                    res.send(err);
+                } else {
+                    res.send(articles);
                 }
                 next();
             });
@@ -76,35 +110,111 @@ const articleCtrller = {
      * @params {}req
      * @return {void}
      */
-    getArticle: (req, res, next) => {
-        Article.findById(req.params.id)
+    getArticle: async (req, res, next) => {
+        const { articleId } = req.params;
+        console.log(`get article ${articleId}`);
+
+        Article.findById(articleId)
             .populate('author')
-            .populate('comments.author');
+            .populate('comments')
+            .exec((err, article) => {
+                if (err) {
+                    res.status(404).json({ msg: err.message });
+                } else if (!article) {
+                    res.status(404).json({ msg: 'Not article.' });
+                } else {
+                    res.json(article.toObject());
+                }
+                next();
+            });
     },
 
-    clapArticle: (req, res, next) => {
-        Article.findById(req.body.article_id)
-            .then((article) => {
-                return article.clap().then(() => {
-                    return res.json({ msg: 'Done' });
-                });
-            })
-            .catch(next);
+    clapArticle: async (req, res, next) => {
+        const { articleId } = req.body;
+        const article = await Article.findById(articleId);
+
+        if (!article) {
+            res.status(404).json({ msg: 'No article.' });
+            next();
+            return;
+        }
+        try {
+            article.clap().then((newArticle) => {
+                const { claps } = newArticle;
+                res.json({ claps });
+                next();
+            });
+        } catch (err) {
+            console.error(err);
+            res.status(400).json({ msg: err.message });
+        }
     },
 
-    commentArticle: (req, res, next) => {
-        Article.findById(req.body.article_id)
-            .then((article) => {
-                return article
-                    .comment({
-                        author: req.body.author_id,
-                        text: req.body.comment,
-                    })
-                    .then(() => {
-                        return res.json({ msg: 'Done' });
-                    });
-            })
-            .catch(next);
+    commentArticle: async (req, res, next) => {
+        const { user } = req;
+        const { articleId, commentText } = req.body;
+        const article = await Article.findById(articleId);
+
+        if (!article) {
+            return res.status(404).json({ msg: 'No article.' });
+        }
+
+        try {
+            const comment = await Comment.create({
+                author: user._id,
+                text: commentText,
+            });
+            const newArticle = article.comment(comment);
+            const comments = await Comment.find({ $in: newArticle.comments });
+            res.status(200).json(comments);
+            next();
+        } catch (err) {
+            return res.status(400).json({ msg: err.message });
+        }
+    },
+
+    getAllArticleComments: async (req, res, next) => {
+        const { articleId } = req.body;
+
+        try {
+            const article = await Article.findById(articleId)
+                .select('comments')
+                .populate('comments');
+            if (!article) {
+                return res.status(404).json({ msg: 'No article.' });
+            }
+
+            const { comments } = article;
+
+            res.json({ comments });
+            next();
+        } catch (err) {
+            return res.status(400).json({ msg: err.message });
+        }
+    },
+
+    deleteComment: async (req, res, next) => {
+        const { user } = req;
+        const { commentId } = req.body;
+        const comment = await Comment.findById(commentId);
+
+        if (!comment) {
+            return res.status(404).json({ msg: 'No comment.' });
+        }
+
+        if (user._id.toString() != comment.author.toString()) {
+            return res.status(403).json({ msg: 'Not author.' });
+        }
+
+        try {
+            await comment.remove().then((token) => {
+                res.json(token);
+                next();
+            });
+        } catch (err) {
+            console.error(err);
+            return res.status(400).json({ msg: err });
+        }
     },
 };
 

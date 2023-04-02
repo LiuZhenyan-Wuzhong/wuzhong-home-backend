@@ -1,0 +1,46 @@
+@json=Content-Type: application/json
+@baseUrl=http://localhost:5000
+@auth_token={{userLogin.response.headers.Set-Cookie}} 
+
+### all users
+GET {{baseUrl}}/api/user
+
+### target user
+GET {{baseUrl}}/api/user/email/cd750635968@sina.com
+Cookie: {{auth_token}}
+
+### signin
+# @name userLogin
+POST {{baseUrl}}/api/user/signin
+{{json}}
+
+{
+    "email":"cd750635968@sina.com",
+    "password":"Cyy110110"
+}
+
+### signup
+POST {{baseUrl}}/api/user
+{{json}}
+
+{
+    "email":"cd750635968@sina.com",
+    "password":"Cyy110110"
+}
+
+### check user
+GET {{baseUrl}}/api/user/check/auth
+
+### remove
+GET {{baseUrl}}/api/user/remove/64084328c4e7f7d0bb085e5a
+
+### update user info
+POST {{baseUrl}}/api/user/update
+{{json}}
+
+{
+    "_id":"64083f5c633ebd86e1054c1e",
+    "name":"wuzhong",
+    "token": "FE1fAAEf-A86B-a0cC",
+    "avatorImgUrl": "http://dummyimage.com/80x80"
+}

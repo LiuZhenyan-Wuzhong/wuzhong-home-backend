@@ -8,17 +8,42 @@
 const articleCtrller = require('./../controllers/article.ctrl');
 const multipart = require('connect-multiparty');
 const multipartWare = multipart();
+const authMiddleware = require('../middlewares/authMiddleware');
 
 const articleRouter = (router) => {
-    router.route('/article/list').get(articleCtrller.getAll);
+    router.route('/article').get(authMiddleware, articleCtrller.getAll);
 
-    router.route('/article').post(multipartWare, articleCtrller.addArticle);
+    router
+        .route('/article/ids')
+        .get(authMiddleware, articleCtrller.getAllArticleIds);
 
-    router.route('/article/clap').post(articleCtrller.clapArticle);
+    router
+        .route('/article/condition')
+        .post(authMiddleware, articleCtrller.getConditionalArticles);
 
-    router.route('/article/comment').post(articleCtrller.commentArticle);
+    router
+        .route('/article')
+        .post(authMiddleware, multipartWare, articleCtrller.addArticle);
 
-    router.route('/article/:id').post(articleCtrller.getArticle);
+    router
+        .route('/article/:articleId')
+        .get(authMiddleware, articleCtrller.getArticle);
+
+    router
+        .route('/article/clap')
+        .post(authMiddleware, articleCtrller.clapArticle);
+
+    router
+        .route('/article/comment')
+        .post(authMiddleware, articleCtrller.commentArticle);
+
+    router
+        .route('/article/comment/list')
+        .post(authMiddleware, articleCtrller.getAllArticleComments);
+
+    router
+        .route('/article/comment')
+        .delete(authMiddleware, articleCtrller.deleteComment);
 };
 
 module.exports = articleRouter;

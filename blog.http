@@ -1,8 +1,0 @@
-@json=Content-Type: application/json
-@formBoundary=------WebKitFormBoundary7MA4YWxkTrZu0gW
-@formData=Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-@baseUrl=http://localhost:5000/
-@csrftoken=X-CSRFTOKEN:GgJMEo5NIbZvOrQ5zooOeilnnXsY1iettLIcgvmUtiQLmOFQLIs0WTpBLlofNZ4Y
-
-### 新建重建参数配置
-GET {{baseUrl}}api/articles/

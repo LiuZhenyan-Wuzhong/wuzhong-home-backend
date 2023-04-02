@@ -1,16 +1,8 @@
-/*
- * @Author:
- * @Date: 2023-02-21 21:34:28
- * @LastEditors: Please set LastEditors
- * @LastEditTime: 2023-02-21 23:18:33
- * @Description:
- */
-
 const mongoose = require('mongoose');
 
 const ArticleSchema = new mongoose.Schema({
-    text: String,
     title: String,
+    text: String,
     description: String,
     feature_img: String,
     claps: Number,
@@ -18,13 +10,24 @@ const ArticleSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
     },
+    update_time: {
+        type: Date,
+        default: Date.now,
+    },
+    category: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Category',
+    },
+    tags: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Tag',
+        },
+    ],
     comments: [
         {
-            author: {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'User',
-            },
-            text: String,
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Comment',
         },
     ],
 });

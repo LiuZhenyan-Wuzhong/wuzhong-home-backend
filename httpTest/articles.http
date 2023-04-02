@@ -1,0 +1,80 @@
+@json=Content-Type: application/json
+@formBoundary=------WebKitFormBoundary7MA4YWxkTrZu0gW
+@formData=Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
+@baseUrl=http://localhost:5000
+@csrftoken=X-CSRFTOKEN:GgJMEo5NIbZvOrQ5zooOeilnnXsY1iettLIcgvmUtiQLmOFQLIs0WTpBLlofNZ4Y
+
+### 获得全部文章列表
+GET {{baseUrl}}/api/article/list
+
+### 发送新文章
+POST {{baseUrl}}/api/article
+{{json}}
+
+{
+    "text":"Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni iste tenetur esse rerum, in voluptatem commodi eveniet velit obcaecati provident a veniam id corrupti dolorum adipisci cupiditate minus totam aspernatur!Lorem ipsum dolor sit amet consectetur adipisicing elit. Magni iste tenetur esse rerum, in voluptatem commodi eveniet velit obcaecati provident a veniam id corrupti dolorum adipisci cupiditate minus totam aspernatur!",
+    "title":"Test Article 2",
+    "claps":0,
+    "description":"this is a test article 2."
+}
+
+### 查看指定文件
+GET {{baseUrl}}/api/article/6401e1e34dd31aac06b5463f
+
+### 查看全部文件
+GET {{baseUrl}}/api/article
+
+### 查看全部文件的id
+GET {{baseUrl}}/api/article/ids
+
+### 查看指定用户全部文件
+POST {{baseUrl}}/api/article/condition
+{{json}}
+
+{
+    "conditions":{
+        "author":"6401d0735ff23b92d7245ee4"
+    },
+    "options":{
+        "limit":null
+    }
+}
+
+### 获得全部类型
+GET {{baseUrl}}/api/category
+
+### 获得全部标签
+GET {{baseUrl}}/api/tag
+
+### 点赞文章
+POST {{baseUrl}}/api/article/clap
+{{json}}
+
+{
+    "articleId":"6401e1e34dd31aac06b5463f"
+}
+
+### 评论文章
+POST {{baseUrl}}/api/article/comment
+{{json}}
+
+{
+    "articleId":"6401e1e34dd31aac06b5463f",
+    "commentText":"A good article."
+}
+
+### 查看文章的全部评论
+POST {{baseUrl}}/api/article/comment/list
+{{json}}
+
+{
+    "articleId":"6401e1e34dd31aac06b5463f"
+}
+
+### 删除评论
+DELETE {{baseUrl}}/api/article/comment
+{{json}}
+
+{
+    "commentId":"640d55bb441c98dbfbfc92c0"
+}
